@@ -31,18 +31,16 @@ app.get(
 
       const url = new URL(query.url);
 
-      const domain = url.hostname;
+      const cachePath = `cache/${url.hostname}.png`;
 
-      const cachePath = `cache/${domain}.png`;
+      const startTime = Date.now();
 
-      const start = Date.now();
-
-      const cacheStat = await Deno.stat(cachePath).catch(() => null);
+      const cachedFile = await Deno.stat(cachePath).catch(() => null);
 
       if (
-        cacheStat &&
-        cacheStat.mtime &&
-        Date.now() - cacheStat.mtime.getTime() < 1000 * 60 * 60 * 24
+        cachedFile &&
+        cachedFile.mtime &&
+        Date.now() - cachedFile.mtime.getTime() < 1000 * 60 * 60 * 24
       ) {
         const cachedScreenshot = await Deno.readFile(cachePath);
 
@@ -76,16 +74,14 @@ app.get(
 
       await Deno.writeFile(cachePath, screenshot);
 
-      const end = Date.now();
-
-      const elapsed = Math.floor(end - start);
+      const elapsedTime = Math.floor(Date.now() - startTime);
 
       console.log(
         `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${
           dim("Captured")
         } ${bold(brightBlue(query.url))} ${dim("in")} ${
           bold(
-            brightYellow(`${Math.round(elapsed / 1000)}s`),
+            brightYellow(`${Math.round(elapsedTime / 1000)}s`),
           )
         }`,
       );
