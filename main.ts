@@ -57,8 +57,10 @@ app.get(
         const cachedScreenshot = await Deno.readFile(cacheFilePath);
 
         console.log(
-          `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${
-            bold(brightBlue(query.url))
+          `${brightGreen(`[CACHE HIT #${cacheHitCount++}]`)} ${
+            bold(
+              brightBlue(query.url),
+            )
           } ${dim(`(${cacheFilePath})`)}`,
         );
 
@@ -89,13 +91,15 @@ app.get(
       const elapsedTime = Math.floor(Date.now() - startTime);
 
       console.log(
-        `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${
-          dim("Captured")
-        } ${bold(brightBlue(query.url))} ${dim("in")} ${
-          bold(
-            brightYellow(`${Math.round(elapsedTime / 1000)}s`),
+        `${brightYellow(`[CACHE MISS #${cacheMissCount++}]`)} ${
+          dim(
+            "Captured",
           )
-        }`,
+        } ${bold(brightBlue(query.url))} ${
+          dim(
+            "in",
+          )
+        } ${brightYellow(`${Math.round(elapsedTime / 1000)}s`)}`,
       );
 
       return c.newResponse(screenshot, {
@@ -126,7 +130,9 @@ Deno.cron("Clear cache", { hour: { every: 3 } }, async () => {
     if (
       file.mtime &&
       Date.now() - file.mtime.getTime() < config.cache.expiration
-    ) continue;
+    ) {
+      continue;
+    }
 
     await Deno.remove(filePath);
   }
