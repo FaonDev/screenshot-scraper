@@ -12,8 +12,6 @@ import process from "node:process";
 import puppeteer from "puppeteer";
 import { z } from "zod";
 
-const app = new Hono();
-
 const config = {
   cache: {
     dir: "cache",
@@ -24,6 +22,8 @@ const config = {
     width: 1366,
   },
 };
+
+const app = new Hono();
 
 let cacheHitCount = 1;
 
@@ -43,23 +43,23 @@ app.get(
 
       const url = new URL(query.url);
 
-      const cachePath = `${config.cache.dir}/${url.hostname}.png`;
+      const cacheFilePath = `${config.cache.dir}/${url.hostname}.png`;
 
       const startTime = Date.now();
 
-      const cachedFile = await Deno.stat(cachePath).catch(() => null);
+      const cachedFile = await Deno.stat(cacheFilePath).catch(() => null);
 
       if (
         cachedFile &&
         cachedFile.mtime &&
         Date.now() - cachedFile.mtime.getTime() < config.cache.expiration
       ) {
-        const cachedScreenshot = await Deno.readFile(cachePath);
+        const cachedScreenshot = await Deno.readFile(cacheFilePath);
 
         console.log(
           `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${
             bold(brightBlue(query.url))
-          } ${dim(`(${cachePath})`)}`,
+          } ${dim(`(${cacheFilePath})`)}`,
         );
 
         return c.newResponse(cachedScreenshot, {
@@ -68,11 +68,10 @@ app.get(
       }
 
       const browser = await puppeteer.launch({
-        args: ["--no-sandbox"],
         defaultViewport: config.screenshot,
         headless: "shell",
         ...(process.platform === "win32" && { handleSIGHUP: false }),
-        ...(Deno.env.get("DOCKER") === "1" && { handleSIGHUP: false }),
+        ...(Deno.env.get("DOCKER") === "1" && { args: ["--no-sandbox"] }),
       });
 
       const page = await browser.newPage();
@@ -85,7 +84,7 @@ app.get(
 
       await browser.close();
 
-      await Deno.writeFile(cachePath, screenshot);
+      await Deno.writeFile(cacheFilePath, screenshot);
 
       const elapsedTime = Math.floor(Date.now() - startTime);
 
