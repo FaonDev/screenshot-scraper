@@ -9,7 +9,7 @@
   },
   "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno run --allow-run -ENRSW --watch main.ts",
+    "dev": "deno run --allow-run --unstable-cron -ENRSW --watch main.ts",
     "husky": "deno run --allow-run -ERW npm:husky"
   }
 }

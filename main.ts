@@ -13,6 +13,8 @@ import { z } from "zod";
 
 const app = new Hono();
 
+const CACHE_EXPIRATION = 1000 * 60 * 60 * 24;
+
 let cacheHitCount = 1;
 
 let cacheMissCount = 1;
@@ -40,7 +42,7 @@ app.get(
       if (
         cachedFile &&
         cachedFile.mtime &&
-        Date.now() - cachedFile.mtime.getTime() < 1000 * 60 * 60 * 24
+        Date.now() - cachedFile.mtime.getTime() < CACHE_EXPIRATION
       ) {
         const cachedScreenshot = await Deno.readFile(cachePath);
 
@@ -100,3 +102,22 @@ app.get(
 );
 
 Deno.serve(app.fetch);
+
+Deno.cron("Clear cache", "*/5 * * * *", async () => {
+  for await (const entry of Deno.readDir("cache")) {
+    if (!entry.isFile || [".gitignore", ".gitkeep"].includes(entry.name)) {
+      continue;
+    }
+
+    const filePath = `cache/${entry.name}`;
+
+    const file = await Deno.stat(filePath);
+
+    if (
+      file.mtime &&
+      Date.now() - file.mtime.getTime() < CACHE_EXPIRATION
+    ) continue;
+
+    await Deno.remove(filePath);
+  }
+});

@@ -19,4 +19,4 @@ RUN deno install --allow-scripts
 
 RUN deno cache main.ts
 
-CMD ["run", "--allow-run", "-ENRSW", "main.ts"]
+CMD ["run", "--allow-run", "--unstable-cron", "-ENRSW", "main.ts"]
