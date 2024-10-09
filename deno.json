@@ -1,0 +1,14 @@
+{
+  "imports": {
+    "@hono/zod-validator": "npm:@hono/zod-validator@^0.4.1",
+    "hono": "npm:hono@^4.6.3",
+    "husky": "npm:husky@^9.1.6",
+    "puppeteer": "npm:puppeteer@^23.5.1",
+    "zod": "npm:zod@^3.23.8"
+  },
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "deno run --allow-run -ENRSW --watch main.ts",
+    "husky": "deno run --allow-run -ERW npm:husky"
+  }
+}

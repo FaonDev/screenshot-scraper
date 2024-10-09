@@ -1,0 +1,2 @@
+deno fmt
+deno lint
