@@ -43,7 +43,7 @@ app.get(
       if (
         cacheStat &&
         cacheStat.mtime &&
-        Date.now() - cacheStat.mtime.getTime() < 1000 * 60
+        Date.now() - cacheStat.mtime.getTime() < 1000 * 60 * 60 * 24
       ) {
         const cachedScreenshot = await Deno.readFile(cachePath);
 
