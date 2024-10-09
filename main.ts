@@ -47,9 +47,9 @@ app.get(
         const cachedScreenshot = await Deno.readFile(cachePath);
 
         console.log(
-          `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${`${
+          `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${
             bold(brightBlue(query.url))
-          } (${dim(cachePath)})`}`,
+          } ${dim(`(${cachePath})`)}`,
         );
 
         return c.newResponse(cachedScreenshot, {
@@ -81,13 +81,13 @@ app.get(
       const elapsed = Math.floor(end - start);
 
       console.log(
-        `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${`${
+        `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${
           dim("Captured")
         } ${bold(brightBlue(query.url))} ${dim("in")} ${
           bold(
             brightYellow(`${Math.round(elapsed / 1000)}s`),
           )
-        }`}`,
+        }`,
       );
 
       return c.newResponse(screenshot, {
