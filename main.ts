@@ -3,9 +3,8 @@ import {
   bold,
   brightBlue,
   brightGreen,
-  brightRed,
   brightYellow,
-  gray,
+  dim,
 } from "@std/fmt/colors";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -48,11 +47,9 @@ app.get(
         const cachedScreenshot = await Deno.readFile(cachePath);
 
         console.log(
-          `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${
-            gray(
-              `${bold(brightBlue(query.url))} (${cachePath})`,
-            )
-          }`,
+          `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${`${
+            bold(brightBlue(query.url))
+          } (${dim(cachePath)})`}`,
         );
 
         return c.newResponse(cachedScreenshot, {
@@ -84,15 +81,13 @@ app.get(
       const elapsed = Math.floor(end - start);
 
       console.log(
-        `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${
-          gray(
-            `Captured ${bold(brightBlue(query.url))} in ${
-              bold(
-                brightRed(`${Math.round(elapsed / 1000)}s`),
-              )
-            }`,
+        `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${`${
+          dim("Captured")
+        } ${bold(brightBlue(query.url))} ${dim("in")} ${
+          bold(
+            brightYellow(`${Math.round(elapsed / 1000)}s`),
           )
-        }`,
+        }`}`,
       );
 
       return c.newResponse(screenshot, {
