@@ -103,7 +103,7 @@ app.get(
 
 Deno.serve(app.fetch);
 
-Deno.cron("Clear cache", "*/5 * * * *", async () => {
+Deno.cron("Clear cache", { hour: { every: 3 } }, async () => {
   for await (const entry of Deno.readDir("cache")) {
     if (!entry.isFile || [".gitignore", ".gitkeep"].includes(entry.name)) {
       continue;
