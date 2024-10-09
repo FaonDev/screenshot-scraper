@@ -2,6 +2,7 @@
   "recommendations": [
     "denoland.vscode-deno",
     "ms-azuretools.vscode-docker",
+    "tamasfe.even-better-toml",
     "vivaxy.vscode-conventional-commits"
   ]
 }
