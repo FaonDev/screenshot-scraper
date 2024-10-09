@@ -8,12 +8,22 @@ import {
 } from "@std/fmt/colors";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import process from "node:process";
 import puppeteer from "puppeteer";
 import { z } from "zod";
 
 const app = new Hono();
 
-const CACHE_EXPIRATION = 1000 * 60 * 60 * 24;
+const config = {
+  cache: {
+    dir: "cache",
+    expiration: 1000 * 60 * 60 * 24,
+  },
+  screenshot: {
+    height: 768,
+    width: 1366,
+  },
+};
 
 let cacheHitCount = 1;
 
@@ -33,7 +43,7 @@ app.get(
 
       const url = new URL(query.url);
 
-      const cachePath = `cache/${url.hostname}.png`;
+      const cachePath = `${config.cache.dir}/${url.hostname}.png`;
 
       const startTime = Date.now();
 
@@ -42,7 +52,7 @@ app.get(
       if (
         cachedFile &&
         cachedFile.mtime &&
-        Date.now() - cachedFile.mtime.getTime() < CACHE_EXPIRATION
+        Date.now() - cachedFile.mtime.getTime() < config.cache.expiration
       ) {
         const cachedScreenshot = await Deno.readFile(cachePath);
 
@@ -59,9 +69,10 @@ app.get(
 
       const browser = await puppeteer.launch({
         args: ["--no-sandbox"],
-        defaultViewport: { height: 768, width: 1366 },
-        handleSIGHUP: false,
+        defaultViewport: config.screenshot,
         headless: "shell",
+        ...(process.platform === "win32" && { handleSIGHUP: false }),
+        ...(Deno.env.get("DOCKER") === "1" && { handleSIGHUP: false }),
       });
 
       const page = await browser.newPage();
@@ -104,18 +115,18 @@ app.get(
 Deno.serve(app.fetch);
 
 Deno.cron("Clear cache", { hour: { every: 3 } }, async () => {
-  for await (const entry of Deno.readDir("cache")) {
+  for await (const entry of Deno.readDir(config.cache.dir)) {
     if (!entry.isFile || [".gitignore", ".gitkeep"].includes(entry.name)) {
       continue;
     }
 
-    const filePath = `cache/${entry.name}`;
+    const filePath = `${config.cache.dir}/${entry.name}`;
 
     const file = await Deno.stat(filePath);
 
     if (
       file.mtime &&
-      Date.now() - file.mtime.getTime() < CACHE_EXPIRATION
+      Date.now() - file.mtime.getTime() < config.cache.expiration
     ) continue;
 
     await Deno.remove(filePath);

@@ -2,6 +2,8 @@ FROM denoland/deno:2.0.0-rc.10
 
 EXPOSE 8000
 
+ENV DOCKER="1"
+
 RUN apt-get update \
     && apt-get install -y wget gnupg \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
