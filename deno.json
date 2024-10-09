@@ -1,6 +1,7 @@
 {
   "imports": {
     "@hono/zod-validator": "npm:@hono/zod-validator@^0.4.1",
+    "@std/fmt": "jsr:@std/fmt@^1.0.2",
     "hono": "npm:hono@^4.6.3",
     "husky": "npm:husky@^9.1.6",
     "puppeteer": "npm:puppeteer@^23.5.1",

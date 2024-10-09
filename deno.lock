@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "jsr:@std/fmt@^1.0.2": "1.0.2",
     "npm:@hono/zod-validator@~0.4.1": "0.4.1_hono@4.6.3_zod@3.23.8",
     "npm:hono@^4.6.3": "4.6.3",
     "npm:husky@*": "9.1.6",
@@ -8,6 +9,11 @@
     "npm:prettier@*": "3.3.3",
     "npm:puppeteer@^23.5.1": "23.5.1_devtools-protocol@0.0.1342118",
     "npm:zod@^3.23.8": "3.23.8"
+  },
+  "jsr": {
+    "@std/fmt@1.0.2": {
+      "integrity": "87e9dfcdd3ca7c066e0c3c657c1f987c82888eb8103a3a3baa62684ffeb0f7a7"
+    }
   },
   "npm": {
     "@babel/code-frame@7.25.7": {
@@ -643,6 +649,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@std/fmt@^1.0.2",
       "npm:@hono/zod-validator@~0.4.1",
       "npm:hono@^4.6.3",
       "npm:husky@^9.1.6",
