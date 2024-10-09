@@ -3,6 +3,7 @@ import {
   bold,
   brightBlue,
   brightGreen,
+  brightRed,
   brightYellow,
   gray,
 } from "@std/fmt/colors";
@@ -13,7 +14,9 @@ import { z } from "zod";
 
 const app = new Hono();
 
-let captureCount = 1;
+let cacheHitCount = 1;
+
+let cacheMissCount = 1;
 
 app.get(
   "/",
@@ -27,7 +30,35 @@ app.get(
     try {
       const query = c.req.valid("query");
 
+      const url = new URL(query.url);
+
+      const domain = url.hostname;
+
+      const cachePath = `cache/${domain}.png`;
+
       const start = Date.now();
+
+      const cacheStat = await Deno.stat(cachePath).catch(() => null);
+
+      if (
+        cacheStat &&
+        cacheStat.mtime &&
+        Date.now() - cacheStat.mtime.getTime() < 1000 * 60
+      ) {
+        const cachedScreenshot = await Deno.readFile(cachePath);
+
+        console.log(
+          `${bold(brightGreen(`[CACHE HIT #${cacheHitCount++}]`))} ${
+            gray(
+              `${bold(brightBlue(query.url))} (${cachePath})`,
+            )
+          }`,
+        );
+
+        return c.newResponse(cachedScreenshot, {
+          headers: { "Content-Type": "image/png" },
+        });
+      }
 
       const browser = await puppeteer.launch({
         args: ["--no-sandbox"],
@@ -38,7 +69,7 @@ app.get(
 
       const page = await browser.newPage();
 
-      await page.goto(query.url, {
+      await page.goto(url.toString(), {
         waitUntil: "networkidle2",
       });
 
@@ -46,15 +77,19 @@ app.get(
 
       await browser.close();
 
+      await Deno.writeFile(cachePath, screenshot);
+
       const end = Date.now();
 
       const elapsed = Math.floor(end - start);
 
       console.log(
-        `${bold(brightGreen(`[Capture #${captureCount++}]`))} ${
+        `${bold(brightYellow(`[CACHE MISS #${cacheMissCount++}]`))} ${
           gray(
-            `Scraped ${bold(brightBlue(query.url))} in ${
-              bold(brightYellow(`${Math.round(elapsed / 1000)}s`))
+            `Captured ${bold(brightBlue(query.url))} in ${
+              bold(
+                brightRed(`${Math.round(elapsed / 1000)}s`),
+              )
             }`,
           )
         }`,
@@ -67,7 +102,7 @@ app.get(
       console.error(e);
 
       throw new HTTPException(500, {
-        message: "Unable to scrape",
+        message: "Unable to capture",
       });
     }
   },
